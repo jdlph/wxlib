@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2022 Wuping Xin
-  Copyright (c) 2018 Fabian Renn-Giles
+  Modified by Wuping Xin Copyright (c) 2022
+  Originally Developed by Fabian Renn-Giles Copyright (c) 2018
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -156,17 +156,17 @@ class static_map
 public:
   static_map() = delete;
 
-  template<typename Identifier, typename... Args, std::enable_if_t<std::is_invocable_v<Identifier>, int> = 0>
-  static Value &get(Identifier identifier, Args &&... args)
+  template<typename Identifier, typename... Args>
+  requires std::is_invocable_v<Identifier> && std::is_convertible_v<detail::identifier_type<Identifier>, Key>
+  static Value &get(Identifier id, Args &&... args)
   {
-    static_assert(std::is_convertible_v<detail::identifier_type<Identifier>, Key>);
-    using UniqueTypeForKeyValue = decltype(detail::idval2type(identifier));
+    using UniqueTypeForKeyValue = decltype(detail::idval2type(id));
 
     auto *mem = storage<UniqueTypeForKeyValue>;
     auto &i_flag = init_flag<UniqueTypeForKeyValue>;
 
     if (!semi_branch_expect(i_flag, true)) {
-      Key key(identifier());
+      Key key(id());
 
       auto it = runtime_map.find(key);
 
@@ -194,12 +194,14 @@ public:
     return *runtime_map.emplace_hint(it, key, u_ptr(new Value(std::forward<Args>(args)...), {nullptr}))->second;
   }
 
-  template<typename Identifier, std::enable_if_t<std::is_invocable_v<Identifier>, int> = 0>
+  template<typename Identifier>
+  requires std::is_invocable_v<Identifier>
   static bool contains(Identifier identifier)
   {
     using UniqueTypeForKeyValue = decltype(detail::idval2type(identifier));
-
-    if (!semi_branch_expect(init_flag < UniqueTypeForKeyValue >, true)) {
+    // @formatter:off
+    if (!semi_branch_expect(init_flag<UniqueTypeForKeyValue>, true)) {
+    // @formatter:on
       auto key = identifier();
       return contains(key);
     }
@@ -212,7 +214,8 @@ public:
     return (runtime_map.find(key) != runtime_map.end());
   }
 
-  template<typename Identifier, std::enable_if_t<std::is_invocable_v<Identifier>, int> = 0>
+  template<typename Identifier>
+  requires std::is_invocable_v<Identifier>
   static void erase(Identifier identifier)
   {
     erase(identifier());
@@ -252,8 +255,10 @@ private:
 
   template<typename>
   alignas(Value) static char storage[sizeof(Value)];
+
   template<typename>
   static bool init_flag;
+
   static std::unordered_map<Key, std::unique_ptr<Value, value_deleter>> runtime_map;
 };
 
