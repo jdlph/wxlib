@@ -1,7 +1,7 @@
 #include <cassert>
 #include <string>
 
-#include "semimap.h"
+#include "semimap.hpp"
 
 #define ID(x) \
     []() constexpr { return x; }
