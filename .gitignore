@@ -40,4 +40,4 @@
 /.tmp/
 /.vs/
 /out/
-*/build*/
+**/build/**

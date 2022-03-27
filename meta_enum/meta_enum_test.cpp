@@ -1,5 +1,5 @@
-#include "include/meta_enum.hpp"
 #include <iostream>
+#include "meta_enum.hpp"
 
 // helpers
 constexpr int sum(int a, int b, int c)
