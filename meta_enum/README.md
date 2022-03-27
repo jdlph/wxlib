@@ -75,4 +75,4 @@ A few functions are provided per `meta_enum` to ease usage.  For an enum with th
 
 ## Examples
 
-See the file in the repo `examples.cpp`
+See the file in the repo `meta_enum_test.cpp`

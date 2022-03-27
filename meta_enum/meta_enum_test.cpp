@@ -42,7 +42,7 @@ struct Nester
       NestedClassB = 1 >> 3);
 };
 
-// Also works with very complexly defined enum entries
+// Also works with very complex defined enum entries
 meta_enum(
     Complex,
     int,
