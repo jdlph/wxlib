@@ -41,3 +41,4 @@
 /.vs/
 /out/
 **/build/**
+build/**
