@@ -10,9 +10,10 @@ add_library(${LIB_NAME}::${LIB_NAME} ALIAS ${LIB_NAME})
 
 add_subdirectory(meta_enum)
 add_subdirectory(semimap)
+add_subdirectory(mio)
 
 # Add include directory to library
-set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/meta_enum" "${CMAKE_CURRENT_SOURCE_DIR}/semimap")
+set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/meta_enum" "${CMAKE_CURRENT_SOURCE_DIR}/semimap" "${CMAKE_CURRENT_SOURCE_DIR}/mio/include")
 
 target_include_directories(
     ${PROJECT_NAME}
