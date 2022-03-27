@@ -1,5 +1,4 @@
 /*
-  Modified by Wuping Xin Copyright (c) 2022
   Originally Developed by Fabian Renn-Giles Copyright (c) 2018
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,6 +19,14 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
+
+/*
+   Modifications by Wuping Xin Copyright (c) 2022
+
+   1. Use C++/20 Concept instead of SFINAE, and updated the minimum C++ requirement
+   2. Refactored the code
+
+ */
 
 #include <cstring>
 #include <memory>
