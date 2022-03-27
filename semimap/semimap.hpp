@@ -32,8 +32,8 @@
 // check C++ version
 #pragma clang diagnostic push
 #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
-#if (defined(_MSVC_LANG) && _MSVC_LANG < 201703L) || ((!defined(_MSVC_LANG)) && __cplusplus < 201703L)
-#error semi::map and semi::static_map require C++17 support
+#if (defined(_MSVC_LANG) && _MSVC_LANG < 202002L) || ((!defined(_MSVC_LANG)) && __cplusplus < 202002L)
+#error semi::map and semi::static_map require C++20 support
 #endif
 
 #ifdef __GNUC__
