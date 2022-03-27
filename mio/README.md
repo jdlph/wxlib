@@ -1,29 +1,27 @@
 # About
 
-This repository is maintenained by Wuping Xin.
+This repository is maintained by Wuping Xin.
 
-Forked from https://github.com/mandreyel/mio, who created this well-documented and easy-to-use original library in modern C++. I thank the original author mandreyel for his great work.
+Forked from https://github.com/mandreyel/mio, who created this well-documented and easy-to-use original library in modern C++. I love this code, and thank the original author mandreyel for his great work.
 
 The motivation for this fork is to have a cross-platform header-only memory mapped file IO lib for my C++17/C++2x projects. It serves as my own "dogfooding" project to try out latest and future experimental C++ 2x features.  
 
 The following changes have been made: 
 
-- One "beautified" single header; duplicate license headers and messy macros from amalgamation are removed
-- Internal clean-up and reformatting for a (maybe slightly) neater C++ 17 style
-- Applied C++ Core Guideline whenever proper; this requires Guideline Standard Library (GSL)
+- "Beautified" single header; duplicate license headers and messy macros from amalgamation are removed
+- Internal clean-up and reformatting for a (maybe slightly) neater C++ style
 - Added a new check that the requested bytes (i.e., offset + length) must not exceed address space limit (e.g. 2GB on x86)
-- Replaced static_cast to narrow_cast whenever proper, better be explicit than implicit
 - Eliminated direct pointer arithmetics
 - Consistent usage of size_type throughout the code
 - Added a simple StringReader class, which provides better performance than std::getline (x10 ~ x15 faster)
-- Some minior bug fix(es)
+- Some other minor bug fix(es)
 
-Note: This repositiory requries C++ 17, and an additional <gsl/gsl> header. The following is the original README about its usage.
+Note: This repository requires C++ 20 (mainly due to the usage of std::span). The following is the original README about its usage.
 
 # mio
-An easy to use header-only cross-platform C++11 (updated: C++17) memory mapping library with an MIT license.
+An easy to use header-only cross-platform C++11 (update: now C++20) memory mapping library with an MIT license.
 
-mio has been created with the goal to be easily includable (i.e. no dependencies) in any C++ project that needs memory mapped file IO without the need to pull in Boost.
+mio has been created with the goal to be easily included (i.e. no dependencies) in any C++ project that needs memory mapped file IO without the need to pull in Boost.
 
 Please feel free to open an issue, I'll try to address any concerns as best I can.
 
@@ -32,10 +30,10 @@ Because memory mapping is the best thing since sliced bread!
 
 More seriously, the primary motivation for writing this library instead of using Boost.Iostreams, was the lack of support for establishing a memory mapping with an already open file handle/descriptor. This is possible with mio.
 
-Furthermore, Boost.Iostreams' solution requires that the user pick offsets exactly at page boundaries, which is cumbersome and error prone. mio, on the other hand, manages this internally, accepting any offset and finding the nearest page boundary.
+Furthermore, Boost.Iostreams' solution requires that the user pick offsets exactly at page boundaries, which is cumbersome and error-prone. mio, on the other hand, manages this internally, accepting any offset and finding the nearest page boundary.
 
 Albeit a minor nitpick, Boost.Iostreams implements memory mapped file IO with a `std::shared_ptr` to provide shared semantics, even if not needed, and the overhead of the heap allocation may be unnecessary and/or unwanted.
-In mio, there are two classes to cover the two use-cases: one that is move-only (basically a zero-cost abstraction over the system specific mmapping functions), and the other that acts just like its Boost.Iostreams counterpart, with shared semantics.
+In mio, there are two classes to cover the two use-cases: one that is move-only (basically a zero-cost abstraction over the system specific memory mapping functions), and the other that acts just like its Boost.Iostreams counterpart, with shared semantics.
 
 ### How to create a mapping
 NOTE: the file must exist before creating a mapping.
@@ -187,7 +185,7 @@ mio::shared_mmap_source shared_mmap4;
 shared_mmap4.map("path", offset, size_to_map, error);
 ```
 
-It's possible to define the type of a byte (which has to be the same width as `char`), though aliases for the most common ones are provided by default:
+It's possible to define the type of byte (which has to be the same width as `char`), though aliases for the most common ones are provided by default:
 ```c++
 using mmap_source = basic_mmap_source<char>;
 using ummap_source = basic_mmap_source<unsigned char>;
@@ -204,10 +202,7 @@ using mmap_sink = mio::basic_mmap_sink<std::byte>;
 Though generally not needed, since mio maps users requested offsets to page boundaries, you can query the underlying system's page allocation granularity by invoking `mio::page_size()`, which is located in `mio/page.hpp`.
 
 ### Single Header File 
-Mio can be added to your project as a single header file simply by including `\single_include\mio\mio.hpp`. Single header files can be regenerated at any time by running the `amalgamate.py` script within `\third_party`.  
-```
-python amalgamate.py -c config.json -s ../include
-```
+Mio can be added to your project as a single header file simply by including `\mio\mio.hpp`. 
 
 ## CMake
 As a header-only library, mio has no compiled components. Nevertheless, a [CMake](https://cmake.org/overview/) build system is provided to allow easy testing, installation, and subproject composition on many platforms and operating systems.
@@ -265,7 +260,7 @@ Mio's testing is also configured to operate as a client to the [CDash](https://w
 
 Mio's build system provides an installation target and support for downstream consumption via CMake's [`find_package`](https://cmake.org/cmake/help/v3.0/command/find_package.html) intrinsic function.
 CMake allows installation to an arbitrary location, which may be specified by defining `CMAKE_INSTALL_PREFIX` at configure time.
-In the absense of a user specification, CMake will install mio to conventional location based on the platform operating system.
+In the absence of a user specification, CMake will install mio to conventional location based on the platform operating system.
 
 To use a static configuration build tool, such as GNU Make or Ninja:
 
@@ -313,7 +308,7 @@ find_package( mio REQUIRED )
 target_link_libraries( MyTarget PUBLIC mio::mio )
 ```
 
-**WINDOWS USERS**: The `mio::mio` target `#define`s `WIN32_LEAN_AND_MEAN` and `NOMINMAX`. The former ensures the imported surface area of the Win API is minimal, and the latter disables Windows' `min` and `max` macros so they don't intefere with `std::min` and `std::max`. Because *mio* is a header only library, these defintions will leak into downstream CMake builds. If their presence is causing problems with your build then you can use the alternative `mio::mio_full_winapi` target, which adds none of these defintions.
+**WINDOWS USERS**: The `mio::mio` target `#define`s `WIN32_LEAN_AND_MEAN` and `NOMINMAX`. The former ensures the imported surface area of the Win API is minimal, and the latter disables Windows' `min` and `max` macros, so they don't interfere with `std::min` and `std::max`. Because *mio* is a header only library, these definitions will leak into downstream CMake builds. If their presence is causing problems with your build then you can use the alternative `mio::mio_full_winapi` target, which adds none of these definitions.
 
 If mio was installed to a non-conventional location, it may be necessary for downstream projects to specify the mio installation root directory via either
 
@@ -334,7 +329,7 @@ The list of supported generators varies from platform to platform. See the outpu
 
 ### Subproject Composition
 To use mio as a subproject, copy the mio repository to your project's dependencies/externals folder.
-If your project is version controlled using git, a git submodule or git subtree can be used to syncronize with the updstream repository.
+If your project is version controlled using git, a git submodule or git subtree can be used to synchronize with the upstream repository.
 The [use](https://services.github.com/on-demand/downloads/submodule-vs-subtree-cheat-sheet/) and [relative advantages](https://andrey.nering.com.br/2016/git-submodules-vs-subtrees/) of these git facilities is beyond the scope of this document, but in brief, each may be established as follows:
 
 ```sh
