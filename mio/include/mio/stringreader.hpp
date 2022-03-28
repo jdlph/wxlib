@@ -22,6 +22,12 @@
 
 #include <mio/mio.hpp>
 
+#ifdef __GNUC__
+#define semi_branch_expect(x, y) __builtin_expect(x, y)
+#else
+#define semi_branch_expect(x, y) x
+#endif
+
 namespace mio {
 
 /**
@@ -87,25 +93,22 @@ public:
    */
   bool getline(std::string &a_line)
   {
-    if (!m_mmap.is_mapped())
-      return false;
+    if (semi_branch_expect(m_mmap.is_mapped(), true)) {
+      const char *l_begin = m_begin;
+      const char *l_find = std::find(l_begin, m_mmap.end(), '\n');
 
-    const char *l_begin = m_begin;
-    const char *l_find = std::find(l_begin, m_mmap.end(), '\n');
-
-    bool result;
-
-    if ((result = (l_find != m_mmap.end()))) {
-      a_line.assign(l_begin, std::prev(l_find));
-      m_begin = std::next(l_find);
+      if (l_find != m_mmap.end()) {
+        a_line.assign(l_begin, std::prev(l_find));
+        m_begin = std::next(l_find);
+        return true;        // return
+      } else {
+        m_mmap.unmap();
+        m_begin = nullptr;
+        return false;      // return
+      }
+    } else {
+      return false;        // return
     }
-
-    if ((!result) && m_mmap.is_mapped()) {
-      m_mmap.unmap();
-      m_begin = nullptr;
-    }
-
-    return result;
   }
 private:
   mmap_source m_mmap;
