@@ -37,9 +37,9 @@ namespace mio {
    Example:
      std::filesystem::path file_path = std::filesystem::current_path()/"test.txt"; 
      assert(std::filesystem::exist(file_path);
-     mio::LineReader line_reader(file_path.string());
+     mio::StringReader reader(file_path.string());
         
-     for(std::string line; line_reader.getline(line); ) {
+     for(std::string line; reader.getline(line); ) {
           // do something with line
      }
  */
