@@ -32,7 +32,6 @@ void test_at_offset(const std::string &buffer, const char *path,
 int handle_error(const std::error_code &error);
 
 void test_stringreader_fast();
-void test_stringreader();
 
 int main()
 {
@@ -135,7 +134,6 @@ int main()
   }
 
   test_stringreader_fast();
-  test_stringreader();
 
   std::printf("all tests passed!\n");
 }
@@ -196,40 +194,41 @@ void test_stringreader_fast()
 
   std::filesystem::path file_path = std::filesystem::current_path() / "stringreader-test.csv";
   assert(std::filesystem::exists(file_path));
-  mio::StringReader reader(file_path.string());
 
-  int counter = 0;
-  auto t0 = high_resolution_clock::now();
+  {
+    mio::StringReader reader(file_path.string());
 
-  if (reader.is_mapped()) {
-    for (std::string line; reader.fast_getline(line);) {
-      counter++;
+    int counter = 0;
+    auto t0 = high_resolution_clock::now();
+
+    if (reader.is_mapped()) {
+      for (std::string line; reader.fast_getline(line);) {
+        counter++;
+      }
     }
+
+    auto t1 = high_resolution_clock::now();
+
+    std::printf("fast string reader reads %d lines in %d milliseconds.\n",
+                counter,
+                duration_cast<milliseconds>(t1 - t0).count());
+    std::cout << std::flush;
   }
 
-  auto t1 = high_resolution_clock::now();
-
-  std::printf("fast string reader reads %d lines in %d milliseconds.\n", counter, duration_cast<milliseconds>(t1 - t0).count());
-  std::cout << std::flush;
-}
-
-void test_stringreader()
-{
-  using namespace std::chrono;
-
-  std::filesystem::path file_path = std::filesystem::current_path() / "stringreader-test.csv";
-  assert(std::filesystem::exists(file_path));
-  mio::StringReader reader(file_path.string());
-
-  int counter = 0;
-  auto t0 = high_resolution_clock::now();
-
-  for (std::string line; reader.getline(line);) {
-    counter++;
+  {
+    std::ifstream fs;
+    fs.open(file_path.string());
+    std::string line;
+    int counter = 0;
+    auto t0 = high_resolution_clock::now();
+    do {
+      std::getline(fs, line);
+      counter++;
+    } while (line.length() > 0);
+    auto t1 = high_resolution_clock::now();
+    std::printf("std::getline reads %d lines in %d milliseconds.\n",
+                counter,
+                duration_cast<milliseconds>(t1 - t0).count());
+    std::cout << std::flush;
   }
-
-  auto t1 = high_resolution_clock::now();
-
-  std::printf("string reader reads %d lines in %d milliseconds.\n", counter, duration_cast<milliseconds>(t1 - t0).count());
-  std::cout << std::flush;
 }
