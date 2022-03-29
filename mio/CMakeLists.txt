@@ -98,7 +98,7 @@ add_library(mio::mio ALIAS mio)
 
 #
 # The include directory for mio can be expected to vary between build
-# and installaion. Here we use a CMake generator expression to dispatch
+# and installation. Here we use a CMake generator expression to dispatch
 # on how the configuration under which this library is being consumed.
 #
 # We define the generator expression as a variable, such that the logic
