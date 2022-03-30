@@ -31,7 +31,7 @@ void test_at_offset(const std::string &buffer, const char *path,
 
 int handle_error(const std::error_code &error);
 
-void test_stringreader_fast();
+void test_stringreader();
 
 int main()
 {
@@ -133,7 +133,7 @@ int main()
 #endif
   }
 
-  test_stringreader_fast();
+  test_stringreader();
 
   std::printf("all tests passed!\n");
 }
@@ -188,7 +188,7 @@ int handle_error(const std::error_code &error)
   return error.value();
 }
 
-void test_stringreader_fast()
+void test_stringreader()
 {
   using namespace std::chrono;
 
@@ -202,14 +202,16 @@ void test_stringreader_fast()
     auto t0 = high_resolution_clock::now();
 
     if (reader.is_mapped()) {
-      for (std::string line; reader.fast_getline(line);) {
+      auto line = reader.getline();
+      while (!line.empty()) {
         counter++;
+        line = reader.getline();
       }
     }
 
     auto t1 = high_resolution_clock::now();
 
-    std::printf("fast string reader reads %d lines in %d milliseconds.\n",
+    std::printf("wxlib::mio::StringReader reads %d lines in %d milliseconds.\n",
                 counter,
                 duration_cast<milliseconds>(t1 - t0).count());
     std::cout << std::flush;

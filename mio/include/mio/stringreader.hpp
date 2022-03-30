@@ -35,15 +35,18 @@ namespace mio {
    std::getline.
 
    Example:
+
      std::filesystem::path file_path = std::filesystem::current_path()/"test.txt"; 
      assert(std::filesystem::exists(file_path));
      mio::StringReader reader(file_path.string());
 
-    if reader.is_mapped() {
-      for(std::string line; reader.fast_getline(line); ) {
-          // do something with line
-      }
-    }
+     if (reader.is_mapped()) {
+       auto line = reader.getline();
+       while (!line.empty()) {
+         counter++;
+         line = reader.getline();
+       }
+     }
  */
 class StringReader
 {
@@ -56,12 +59,12 @@ public:
 
      \param   a_file  The file to read. Must exists.
    */
-  StringReader(const std::string &a_file) : m_mmap{a_file}
+  [[maybe_unused]] explicit StringReader(const std::string &a_file) : m_mmap{a_file}
   {
     m_begin = m_mmap.begin();
   }
 
-  StringReader(const std::string &&a_file) : m_mmap{a_file}
+  explicit StringReader(const std::string &&a_file) : m_mmap{a_file}
   {
     m_begin = m_mmap.begin();
   }
@@ -72,16 +75,14 @@ public:
   StringReader &operator=(StringReader &) = delete;
   StringReader &operator=(StringReader &&) = delete;
 
-  ~StringReader()
-  {
-  }
+  ~StringReader() = default;
 
   /**
      Checks whether the reader has reached end of file.
 
      \returns True if end of line, false otherwise.
    */
-  bool eof() const noexcept
+  [[maybe_unused]] [[nodiscard]] bool eof() const noexcept
   {
     return (m_begin == nullptr);
   }
@@ -92,38 +93,18 @@ public:
 
    \returns True if mapped, false otherwise.
  */
-  inline bool is_mapped() const noexcept
+  [[nodiscard]] inline bool is_mapped() const noexcept
   {
     return m_mmap.is_mapped();
   }
 
   /**
-     Reads a new line into a string.  Internally, each getline call will
-     verify the precondition (invariant) that the underlying file has been mapped.
-     This incurs extra cost for very large files with large number of lines.
+     Reads a new line into a string view.
+     Precondition - StringReader::is_mapped() must be true.
 
-     \param [in,out]  a_line  The line that has been read from the file.
-
-     \returns True if it reads a new line, false if it has reached end of file.
+     \returns A std::string_view, nullptr if the reader has reached end of file.
    */
-  bool getline(std::string &a_line) noexcept
-  {
-    if (is_mapped()) {
-      return fast_getline(a_line);
-    } else {
-      return false;
-    }
-  }
-
-  /**
-     Reads a new line into a string, in a "fast" fashion. Precondition
-     check is omitted for faster processing.
-
-     \param [in,out]  a_line  The line that has been read from the file.
-
-     \returns True if it reads a new line, false if it has reached end of file.
-   */
-  bool fast_getline(std::string &a_line) noexcept
+  std::string_view getline() noexcept
   {
     const char *l_begin = m_begin;
     const char *l_find = std::find(l_begin, m_mmap.end(), '\n');
@@ -133,13 +114,12 @@ public:
     // for l_find != m_mmap.end(). So we give this hint to the compiler
     // for better branch prediction.
     if (semi_branch_expect((l_find != m_mmap.end()), true)) {
-      a_line.assign(l_begin, std::prev(l_find));
       m_begin = std::next(l_find);
-      return true;        // return
+      return {l_begin, static_cast<size_t>(l_find - l_begin - 1)}; // '\n' excluded.
     } else {
       m_mmap.unmap();
       m_begin = nullptr;
-      return false;      // return
+      return {nullptr, 0};
     }
   }
 private:
