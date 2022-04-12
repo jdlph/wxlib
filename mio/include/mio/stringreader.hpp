@@ -31,8 +31,8 @@
 namespace mio {
 
 /**
-   A fast line reader based on memory mapped file. It is ~ 15x faster than
-   std::getline.
+   A fast line reader based on memory mapped file. It is about ~4x to ~6x faster than
+   std::getline in line-by-line loading.
 
    Example:
 
@@ -57,7 +57,9 @@ public:
      specified file does not exist, std::system_error will be thrown with
      error code describing the nature of the error.
 
-     \param   a_file  The file to read. Must exists.
+     Precondition - the file to load must exist.
+
+     \param   a_file  The file to read. It must exist.
    */
   [[maybe_unused]] explicit StringReader(const std::string &a_file) : m_mmap{a_file}
   {
@@ -105,7 +107,7 @@ public:
      Reads a new line into a string view.
      Precondition - StringReader::is_mapped() must be true.
 
-     \returns A std::string_view, nullptr if the reader has reached end of file.
+     \returns A std::string_view, {nullptr, 0} will be returned if the reader has reached end of file.
    */
   std::string_view getline() noexcept
   {
@@ -118,7 +120,7 @@ public:
     if (semi_branch_expect((l_find != m_mmap.end()), true))
       m_begin = std::next(l_find);
     else
-      l_begin = (m_begin = nullptr); // Set l_begin nullptr; otherwise it could be m_mmap.end().
+      m_begin = (l_begin = nullptr), (l_find = nullptr); // Set BOTH l_begin AND l_find nullptr if end of file.
 
     return {l_begin, static_cast<size_t>(l_find - l_begin)};
   }
