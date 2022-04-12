@@ -173,7 +173,7 @@ void test_at_offset(const MMap &file_view, const std::string &buffer,
        buf_idx < buffer.size() && view_idx < file_view.size();
        ++buf_idx, ++view_idx) {
     if (file_view[view_idx] != buffer[buf_idx]) {
-      std::printf("%th byte mismatch: expected(%d) <> actual(%d)",
+      std::printf("%zd th byte mismatch: expected(%d) <> actual(%d)",
                   buf_idx, buffer[buf_idx], file_view[view_idx]);
       std::cout << std::flush;
       assert(0);
@@ -212,7 +212,7 @@ void test_stringreader()
 
     auto t1 = high_resolution_clock::now();
 
-    std::printf("wxlib::mio::StringReader reads %d lines in %d milliseconds.\n",
+    std::printf("wxlib::mio::StringReader reads %d lines in %lld milliseconds.\n",
                 counter,
                 duration_cast<milliseconds>(t1 - t0).count());
     std::cout << std::flush;
@@ -231,7 +231,7 @@ void test_stringreader()
     } while (line.length() > 0);
 
     auto t1 = high_resolution_clock::now();
-    std::printf("std::getline reads %d lines in %d milliseconds.\n",
+    std::printf("std::getline reads %d lines in %lld milliseconds.\n",
                 counter,
                 duration_cast<milliseconds>(t1 - t0).count());
     std::cout << std::flush;
