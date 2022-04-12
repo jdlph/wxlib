@@ -42,7 +42,7 @@ namespace mio {
 
      if (reader.is_mapped()) {
        auto line = reader.getline();
-       while (!line.empty()) {
+       while (!reader.eof()) {
          counter++;
          line = reader.getline();
        }
@@ -112,14 +112,13 @@ public:
     const char *l_begin = m_begin;
     const char *l_find = std::find(l_begin, m_mmap.end(), '\n');
 
-    // Typically, l_find == m_mmap.end() happens only once
-    // at the end of file. The majority of the processing will be
-    // for l_find != m_mmap.end(). So we give this hint to the compiler
+    // l_find == m_mmap.end() happens only once at end of file. The majority of the
+    // processing will be for l_find != m_mmap.end(). Give this hint to the compiler
     // for better branch prediction.
     if (semi_branch_expect((l_find != m_mmap.end()), true))
       m_begin = std::next(l_find);
     else
-      m_begin = nullptr;
+      l_begin = (m_begin = nullptr); // Set l_begin nullptr; otherwise it could be m_mmap.end().
 
     return {l_begin, static_cast<size_t>(l_find - l_begin)};
   }
