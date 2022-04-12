@@ -203,9 +203,10 @@ void test_stringreader()
 
     if (reader.is_mapped()) {
       auto line = reader.getline();
-      while (!line.empty()) {
-        counter++;
+      counter++;
+      while (!reader.eof()) {
         line = reader.getline();
+        counter++;
       }
     }
 
@@ -223,10 +224,12 @@ void test_stringreader()
     std::string line;
     int counter = 0;
     auto t0 = high_resolution_clock::now();
+
     do {
       std::getline(fs, line);
       counter++;
     } while (line.length() > 0);
+
     auto t1 = high_resolution_clock::now();
     std::printf("std::getline reads %d lines in %d milliseconds.\n",
                 counter,
